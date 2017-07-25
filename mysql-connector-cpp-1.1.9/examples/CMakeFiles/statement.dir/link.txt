@@ -1,0 +1,1 @@
+/usr/bin/c++       CMakeFiles/statement.dir/statement.cpp.o  -o statement  -L/home/raymond/elec499/autopot-c++/mysql-connector-cpp-1.1.9/cppconn -rdynamic ../driver/libmysqlcppconn-static.a -lmysqlclient -lpthread -lz -lm -lrt -ldl -Wl,-rpath,/home/raymond/elec499/autopot-c++/mysql-connector-cpp-1.1.9/cppconn 
