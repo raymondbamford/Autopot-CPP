@@ -1,1 +1,0 @@
-/usr/bin/c++       CMakeFiles/resultset_binary.dir/resultset_binary.cpp.o  -o resultset_binary  -L/home/raymond/elec499/autopot-c++/mysql-connector-cpp-1.1.9/cppconn -rdynamic ../driver/libmysqlcppconn-static.a -lmysqlclient -lpthread -lz -lm -lrt -ldl -Wl,-rpath,/home/raymond/elec499/autopot-c++/mysql-connector-cpp-1.1.9/cppconn 

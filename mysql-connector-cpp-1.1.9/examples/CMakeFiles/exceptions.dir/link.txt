@@ -1,1 +1,0 @@
-/usr/bin/c++       CMakeFiles/exceptions.dir/exceptions.cpp.o  -o exceptions  -L/home/raymond/elec499/autopot-c++/mysql-connector-cpp-1.1.9/cppconn -rdynamic ../driver/libmysqlcppconn-static.a -lmysqlclient -lpthread -lz -lm -lrt -ldl -Wl,-rpath,/home/raymond/elec499/autopot-c++/mysql-connector-cpp-1.1.9/cppconn 
