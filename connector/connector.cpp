@@ -25,6 +25,38 @@
 using namespace std;
 
 
+string check_Comport(int cport_nr){
+  int n;
+  unsigned char buf[4096];
+
+  string input="";
+  n = RS232_PollComport(cport_nr, buf, 4095);
+
+  if(n > 0){
+    buf[n] = 0;   /* always put a "null" at the end of a string! */
+
+    for(int i=0; i < n; i++){
+      if(buf[i] < 32){  /* replace unreadable control-codes by dots */
+        buf[i] = '.';
+      }
+    }
+    input = (char *)buf;
+    cout << "received "<< n <<" bytes: " << input << endl;
+    return input;
+  }
+}
+
+int open_Comport(int cport_nr, int bdrate, char mode[4]){
+  if(RS232_OpenComport(cport_nr, bdrate, mode))
+  {
+    cout << "Cannot open comport" << endl;
+    return 1;
+  }
+  else {
+    return 0;
+  }
+}
+
 int add_entries(string potId, float nutLvl, float waterTemp, float waterLvl, 
 		float waterCond, float ambientTemp, float ambientHumid, float lightIntensity)
 {
@@ -78,74 +110,45 @@ int add_entries(string potId, float nutLvl, float waterTemp, float waterLvl,
 
 int main(int argc, const char **argv)
 {
-  int i, n, x,
-      cport_nr=24,        /* /dev/ttyACM0 (COM? on Linux) */
+  int x;
+  int cport_nr=24,        /* /dev/ttyACM0 (COM? on Linux) */
       bdrate=9600;       /* 9600 baud */
-
-  unsigned char buf[4096];
-  float sensor_readings[8];
-  string potId;
   char mode[]={'8','N','1',0};
+  float sensor_readings[8];
+  string potId, inputString;
 
-  if(RS232_OpenComport(cport_nr, bdrate, mode))
-  {
-    cout << "Cannot open comport" << endl;
-
-    return(0);
-  }
+  open_Comport(cport_nr, bdrate, mode);
   
-  RS232_cputs(cport_nr, "a");
   usleep(100000); //short delay
-  printf("Starting Arduino...\n");
 
   while(1)
   {
+    inputString = check_Comport(cport_nr);
     x=0;
-    n = RS232_PollComport(cport_nr, buf, 4095);
+    istringstream ss(inputString);
+    string token;
 
-    if(n > 0)
-    {
-      buf[n] = 0;   /* always put a "null" at the end of a string! */
-
-      for(i=0; i < n; i++)
-      {
-        if(buf[i] < 32)  /* replace unreadable control-codes by dots */
-        {
-          buf[i] = '.';
-        }
+    while(getline(ss, token, ',')) {
+      sensor_readings[x] = stof(token);
+      cout << "Token "<< x << ": " << token <<endl;
+      if (x==0){
+        potId = token;
       }
-      string input((char *)buf);
-      istringstream ss(input);
-      string token;
-
-      while(getline(ss, token, ',')) {
-	sensor_readings[x] = stof(token);
-	cout << "Token "<< x << ": " << token <<endl;
-	if (x==0){
-          potId = token;
-	}
-	x++;
-      }
-      ss.clear();
-      printf("received %i bytes: %s\n", n, (char *)buf);
-      if(add_entries(potId,
-		     sensor_readings[4], // liquid level or nutrient level
-		     sensor_readings[2], // water temp
-		     sensor_readings[3], // water level
-		     sensor_readings[1], // water conductivity
-		     sensor_readings[5], // air temp
-		     sensor_readings[6], // air humidity
-		     sensor_readings[7])){ // light intensity
-	cout << "Cannot write to SQL database!" << endl;
-        return(0);
-      }
+      x++;
     }
-
-    usleep(4900000); // sleep for 4.9 seconds
-    RS232_cputs(cport_nr, "a");
-    usleep(100000); // short delay
+    ss.clear();
+    if(add_entries(potId,
+      sensor_readings[4], // liquid level or nutrient level
+      sensor_readings[2], // water temp
+      sensor_readings[3], // water level
+      sensor_readings[1], // water conductivity
+      sensor_readings[5], // air temp
+      sensor_readings[6], // air humidity
+      sensor_readings[7])){ // light intensity
+      cout << "Cannot write to SQL database!" << endl;
+      return(0);
+    }
   }
-
   return(0);
 }
 
