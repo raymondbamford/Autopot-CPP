@@ -2,12 +2,10 @@
 
 # echo "Hello, $1" 
 
-unparsedString=$(setserial -g /dev/ttyACM[0123456789])
+#var1=$(setserial -g /dev/ttyACM[0123456789] | cut -c 1-12)
+var1=$(setserial -g /dev/ttyUSB[0123456789] | cut -c 1-12)
 
-for i in {0..11}
-do
-  comports[i]=$unparsedString[i]
-done
+#echo "test"
+#echo "$var1"
 
-echo "test"
-echo $comports
+./connector $var1
